@@ -1,6 +1,7 @@
-#include "hook.h"
+#include "hook_sys.h"
 
 extern int incalling;
+extern Hunter_sys_hook Sys_hook[0x300];
 void checkArg(int argc, char* argv[], char* envp[]){
 	if(argc < 2){
 		puts("At least one param for target_process!");
@@ -24,13 +25,11 @@ void tracerwork(pid_t tracee){
 	                              tracee, 8 * ORIG_RAX,
 	                              NULL);
 		switch (orig_rax){
-			case SYS_write:
-				Hunter_write(tracee);
-				break;
-			case SYS_read:
-				Hunter_read(tracee);
-				break;
 			default:
+				if(Sys_hook[orig_rax])
+				{
+					Sys_hook[orig_rax](tracee);
+				}
 				break;
 		}
 		//change syscall state
@@ -38,17 +37,21 @@ void tracerwork(pid_t tracee){
 	}
 }
 
-int Hunter_write(pid_t tracee)
+void pre_sys_hook(){
+	Hunter_sys_reg(SYS_write, Hunter_sys_write);
+	Hunter_sys_reg(SYS_read, Hunter_sys_read);
+}
+//demo hook_sys do function
+int Hunter_sys_write(pid_t tracee)
 {
 	long orig_rax;
 	struct user_regs_struct regs;
 	int status;
 	ptrace(PTRACE_GETREGS, tracee, NULL, &regs);
-	/*enter syscall*/
+	/*Entry write syscall*/
 	if(!incalling){
 		printf("Enter Sys_write call with: regs.rdi [%ld], regs.rsi[%ld], regs.rdx[%ld], regs.rax[%ld], regs.orig_rax[%ld]\n",
                     regs.rdi, regs.rsi, regs.rdx,regs.rax, regs.orig_rax);
-
 	}
 	/*leave syscall*/
 	else{
@@ -57,7 +60,7 @@ int Hunter_write(pid_t tracee)
 	incalling = !incalling;
 
 }
-int Hunter_read(pid_t tracee)
+int Hunter_sys_read(pid_t tracee)
 {
 	long orig_rax;
 	struct user_regs_struct regs;
@@ -67,11 +70,39 @@ int Hunter_read(pid_t tracee)
 	if(!incalling){
 		printf("Enter Sys_read call with: regs.rdi [%ld], regs.rsi[%ld], regs.rdx[%ld], regs.rax[%ld], regs.orig_rax[%ld]\n",
                     regs.rdi, regs.rsi, regs.rdx,regs.rax, regs.orig_rax);
-
+		check_stack(tracee);
 	}
 	/*leave syscall*/
 	else{
 		printf("[Leave SYS_read call return regs.rax [%ld], regs.orig_rax [%ld]\n", regs.rax, regs.orig_rax);
 	}
 	incalling = !incalling;
+}
+
+
+//define two functions for syscall callback function reg | unreg
+void Hunter_sys_reg(long syscall, Hunter_sys_hook callback){
+
+	//to do
+	//other check
+	Sys_hook[syscall] = callback;
+}
+
+void Hunter_sys_unreg(long syscall){
+	Sys_hook[syscall] = NULL;
+}
+
+void check_stack(tracee){
+	long orig_rax;
+	struct user_regs_struct regs;
+	int status;
+	ptrace(PTRACE_GETREGS, tracee, NULL, &regs);
+
+	//test rbp  >= buf_base + length
+	puts("Check********************");
+	printf("rbp: %lx, rsi: %lx, rdx: %lx\n", regs.rbp, regs.rsi, regs.rdx);
+	if(regs.rbp < regs.rsi + regs.rdx){
+		puts("[xxx]Buffer over flow!");
+	}
+
 }

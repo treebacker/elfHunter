@@ -1,8 +1,11 @@
-#include "hook.h"
+#include "hook_sys.h"
 
 // global mark for syscall state 
-// enter | exit
+// enter | exita
 int incalling = 0;
+
+//global sys_hook_table
+Hunter_sys_hook Sys_hook[0x300];
 int main(int argc, char* argv[], char* envp[])
 {
 	checkArg(argc, argv, envp);
@@ -16,6 +19,7 @@ int main(int argc, char* argv[], char* envp[])
 		execve(argv[1], childArgv, envp);
 	}
 	else{
+		pre_sys_hook();
 		tracerwork(childPid);
 	}
 }

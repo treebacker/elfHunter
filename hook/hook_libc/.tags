@@ -1,0 +1,104 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ALIGN_ADDR	plt.c	192;"	d	file:
+ELF_CLASS	plt.c	121;"	d	file:
+ELF_CLASS	plt.c	148;"	d	file:
+ELF_R_SYM	plt.c	141;"	d	file:
+ELF_R_SYM	plt.c	170;"	d	file:
+ELF_R_TYPE	plt.c	144;"	d	file:
+ELF_R_TYPE	plt.c	173;"	d	file:
+ELF_SXWORD_FMT	plt.c	130;"	d	file:
+ELF_SXWORD_FMT	plt.c	154;"	d	file:
+ELF_SXWORD_FMT	plt.c	158;"	d	file:
+ELF_TARGET_ALL	plt.c	54;"	d	file:
+ELF_WORD_FMT	plt.c	124;"	d	file:
+ELF_WORD_FMT	plt.c	152;"	d	file:
+ELF_WORD_FMT	plt.c	156;"	d	file:
+ELF_XWORD_FMT	plt.c	126;"	d	file:
+ELF_XWORD_FMT	plt.c	128;"	d	file:
+ELF_XWORD_FMT	plt.c	153;"	d	file:
+ELF_XWORD_FMT	plt.c	157;"	d	file:
+Elf_Dyn	plt.c	137;"	d	file:
+Elf_Dyn	plt.c	166;"	d	file:
+Elf_Ehdr	plt.c	134;"	d	file:
+Elf_Ehdr	plt.c	163;"	d	file:
+Elf_Half	plt.c	131;"	d	file:
+Elf_Half	plt.c	160;"	d	file:
+Elf_Phdr	plt.c	135;"	d	file:
+Elf_Phdr	plt.c	164;"	d	file:
+Elf_Plt_Rel	plt.c	108;"	d	file:
+Elf_Plt_Rel	plt.c	113;"	d	file:
+Elf_Rel	plt.c	138;"	d	file:
+Elf_Rel	plt.c	167;"	d	file:
+Elf_Rela	plt.c	139;"	d	file:
+Elf_Rela	plt.c	168;"	d	file:
+Elf_Sxword	plt.c	133;"	d	file:
+Elf_Sxword	plt.c	162;"	d	file:
+Elf_Sym	plt.c	136;"	d	file:
+Elf_Sym	plt.c	165;"	d	file:
+Elf_Xword	plt.c	132;"	d	file:
+Elf_Xword	plt.c	161;"	d	file:
+NUM_MAPS	plt.c	487;"	d	file:
+PLT_DT_REL	plt.c	109;"	d	file:
+PLT_DT_REL	plt.c	114;"	d	file:
+PLT_DT_RELENT	plt.c	111;"	d	file:
+PLT_DT_RELENT	plt.c	116;"	d	file:
+PLT_DT_RELSZ	plt.c	110;"	d	file:
+PLT_DT_RELSZ	plt.c	115;"	d	file:
+R_GLOBAL_DATA	plt.c	79;"	d	file:
+R_GLOBAL_DATA	plt.c	82;"	d	file:
+R_GLOBAL_DATA	plt.c	86;"	d	file:
+R_GLOBAL_DATA	plt.c	90;"	d	file:
+R_GLOBAL_DATA	plt.c	93;"	d	file:
+R_GLOBAL_DATA	plt.c	96;"	d	file:
+R_JUMP_SLOT	plt.c	100;"	d	file:
+R_JUMP_SLOT	plt.c	102;"	d	file:
+R_JUMP_SLOT	plt.c	78;"	d	file:
+R_JUMP_SLOT	plt.c	81;"	d	file:
+R_JUMP_SLOT	plt.c	85;"	d	file:
+R_JUMP_SLOT	plt.c	89;"	d	file:
+R_JUMP_SLOT	plt.c	92;"	d	file:
+R_JUMP_SLOT	plt.c	95;"	d	file:
+R_JUMP_SLOT	plt.c	98;"	d	file:
+R_X86_64_JUMP_SLOT	plt.c	74;"	d	file:
+SIZE_T_FMT	plt.c	123;"	d	file:
+SIZE_T_FMT	plt.c	150;"	d	file:
+USE_REL	plt.c	83;"	d	file:
+USE_REL	plt.c	87;"	d	file:
+_GNU_SOURCE	plt.c	40;"	d	file:
+__EXTENSIONS__	plt.c	37;"	d	file:
+__attribute__	plt.c	66;"	d	file:
+addr	plt.c	/^    char* addr;$/;"	m	struct:dl_iterate_data	file:
+check_elf_header	plt.c	/^static int check_elf_header(const Elf_Ehdr *ehdr)$/;"	f	file:
+check_rel	plt.c	/^static int check_rel(const plthook_t *plthook, const Elf_Plt_Rel *plt, Elf_Xword r_type, const char **name_out, void ***addr_out)$/;"	f	file:
+dl_iterate_cb	plt.c	/^static int dl_iterate_cb(struct dl_phdr_info *info, size_t size, void *cb_data)$/;"	f	file:
+dl_iterate_data	plt.c	/^struct dl_iterate_data {$/;"	s	file:
+dynstr	plt.c	/^    const char *dynstr;$/;"	m	struct:plthook	file:
+dynstr_size	plt.c	/^    size_t dynstr_size;$/;"	m	struct:plthook	file:
+dynsym	plt.c	/^    const Elf_Sym *dynsym;$/;"	m	struct:plthook	file:
+errmsg	plt.c	/^static char errmsg[512];$/;"	v	file:
+find_dyn_by_tag	plt.c	/^static const Elf_Dyn *find_dyn_by_tag(const Elf_Dyn *dyn, Elf_Sxword tag)$/;"	f	file:
+get_memory_permission	plt.c	/^static int get_memory_permission(void *address)$/;"	f	file:
+lmap	plt.c	/^    struct link_map lmap;$/;"	m	struct:dl_iterate_data	typeref:struct:dl_iterate_data::link_map	file:
+page_size	plt.c	/^static size_t page_size;$/;"	v	file:
+plt_addr_base	plt.c	/^    const char *plt_addr_base;$/;"	m	struct:plthook	file:
+plthook	plt.c	/^struct plthook {$/;"	s	file:
+plthook_close	plt.c	/^void plthook_close(plthook_t *plthook)$/;"	f
+plthook_enum	plt.c	/^int plthook_enum(plthook_t *plthook, unsigned int *pos, const char **name_out, void ***addr_out)$/;"	f
+plthook_error	plt.c	/^const char *plthook_error(void)$/;"	f
+plthook_open	plt.c	/^int plthook_open(plthook_t **plthook_out, const char *filename)$/;"	f
+plthook_open_by_address	plt.c	/^int plthook_open_by_address(plthook_t **plthook_out, void *address)$/;"	f
+plthook_open_by_handle	plt.c	/^int plthook_open_by_handle(plthook_t **plthook_out, void *hndl)$/;"	f
+plthook_open_executable	plt.c	/^static int plthook_open_executable(plthook_t **plthook_out)$/;"	f	file:
+plthook_open_real	plt.c	/^static int plthook_open_real(plthook_t **plthook_out, struct link_map *lmap)$/;"	f	file:
+plthook_open_shared_library	plt.c	/^static int plthook_open_shared_library(plthook_t **plthook_out, const char *filename)$/;"	f	file:
+plthook_replace	plt.c	/^int plthook_replace(plthook_t *plthook, const char *funcname, void *funcaddr, void **oldfunc)$/;"	f
+rela_dyn	plt.c	/^    const Elf_Plt_Rel *rela_dyn;$/;"	m	struct:plthook	file:
+rela_dyn_cnt	plt.c	/^    size_t rela_dyn_cnt;$/;"	m	struct:plthook	file:
+rela_plt	plt.c	/^    const Elf_Plt_Rel *rela_plt;$/;"	m	struct:plthook	file:
+rela_plt_cnt	plt.c	/^    size_t rela_plt_cnt;$/;"	m	struct:plthook	file:
+set_errmsg	plt.c	/^static void set_errmsg(const char *fmt, ...)$/;"	f	file:

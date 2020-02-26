@@ -3,6 +3,6 @@
 
 int main()
 {
-	write(0, "abcde", 5);
-	return 0;
+	puts("aaaa");
+	printf("wwwww");
 }
