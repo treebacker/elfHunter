@@ -21,7 +21,11 @@
 
 //elf
 #include "allelf.h"
+#include "break.h"
 
+
+//breakpoints list info
+bkpoint* break_list[0x1000];
 struct plthook {
     //addr in tracee
     //cnt
@@ -54,6 +58,7 @@ size_t getCodebase(pid_t pid)
     if(fd == -1)
     {
         perror("open maps");
+        return 0;
     }
     read(fd, buf, 2 * sizeof(size_t));
     end = strchr(buf, '-');
@@ -76,8 +81,9 @@ void ptrace_getdata(pid_t tracee, char* addr_in,
 
    // char* data_out;
     union traceval buf;
-    unsigned int idx, num;
+    unsigned int idx, num, mod;
     num = size / sizeof(int);
+    mod = size % sizeof(int);
 
     //malloc a mem to store the data
     *addr_out = malloc(size);
@@ -90,6 +96,12 @@ void ptrace_getdata(pid_t tracee, char* addr_in,
                                                 addr_in, NULL);
         memcpy(*addr_out+idx*sizeof(int), buf.chars, sizeof(int));
         addr_in += sizeof(int);
+    }
+    
+    if(mod){
+        buf.val = ptrace(PTRACE_PEEKDATA, tracee,
+                                                addr_in, NULL);
+        memcpy(*addr_out+num*sizeof(int), buf.chars, mod);
     }
 
     return;
@@ -160,6 +172,10 @@ int plthook_open(plthook_t **plthook_out, const char *filename, pid_t tracee)
         perror("malloc for plthook");
     }
     plthook->codebase = getCodebase(tracee);
+    if(!plthook->codebase){
+        perror("Failed to get codebase!");
+        return 0;
+    }
 
     plthook->plt = plt->sh_addr;
     plthook->dynsym = dynsym->sh_addr;
@@ -181,20 +197,6 @@ int plthook_open(plthook_t **plthook_out, const char *filename, pid_t tracee)
         plthook->rela_plt += ((size_t)(plthook->rela_plt) +  plthook->codebase);
     }
 
-    /*
-    debug info
-    printf("%s addr: 0x%x\n", ".plt", plthook->plt);
-    printf("%s addr: 0x%x\n", ".dynsym", plthook->dynsym);
-    printf("%s addr: 0x%x\n", ".dynstr", plthook->dynstr);
-    printf("%s addr: 0x%x\n", ".rela.plt", plthook->rela_plt);
-
-    printf("plt_size: 0x%x\n", plthook->plt_size);
-    printf("rela_plt_cnt: 0x%x\n", plthook->rela_plt_cnt);
-    printf("dynstr_size:  0x%x\n",  plthook->dynstr_size);
-    printf("dynsym_cnt:  0x%x\n",  plthook->dynsym_cnt);
-    printf("codebase: 0x%x\n", plthook->codebase);
-    */
-
     ptrace_getdata(tracee, plthook->dynstr, &(plthook->dynstr_out), plthook->dynstr_size);
     ptrace_getdata(tracee, plthook->dynsym, &(plthook->dynsym_out), plthook->dynsym_cnt * sizeof(Elf_Sym));
     ptrace_getdata(tracee, plthook->rela_plt, &(plthook->rela_plt_out), plthook->rela_plt_cnt * sizeof(Elf_Rela));
@@ -203,14 +205,16 @@ int plthook_open(plthook_t **plthook_out, const char *filename, pid_t tracee)
     {
         puts("out pointer failed!");
     }
-    
-    /**
-        a test to find_plt with a function name
+  
+    /* test find_plt
+    size_t addr = find_plt(plthook, "__isoc99_scanf");
+    if(addr == 0){
+        perror("find_plt");
+        exit(0);
+    }
+    printf("scanf address: %p\n", addr);
     */
-    size_t addr = find_plt(plthook, "puts");
-    printf("puts_plt: %p\n", addr);
 
-    //return
     *plthook_out = plthook;
     return 0;
 }
@@ -231,8 +235,10 @@ size_t find_plt(plthook_t *plthook, const char* funcname)
     for(i=0; i < plthook->dynstr_size; i++)
     {
         now_name = plthook->dynstr_out + i;
+       // puts(now_name);
         if(strcmp(now_name, funcname) == 0){
             st_name = i;
+           // printf("st_name: %d\n", st_name);
             break;
         }
         i += strlen(now_name);
@@ -243,8 +249,8 @@ size_t find_plt(plthook_t *plthook, const char* funcname)
 
         now_dynsym = plthook->dynsym_out[i];
         if(now_dynsym.st_name == st_name){
-            printf("dynsym_index: %d\n", i);
             r_info = stname_to_info(i);
+         //   printf("r_info: %x\n", r_info);
 
             break;
         }
@@ -256,24 +262,97 @@ size_t find_plt(plthook_t *plthook, const char* funcname)
         now_rela_plt = plthook->rela_plt_out[i];
         if(now_rela_plt.r_info == r_info){
             //jmp over PLT[0]
+
             plt_index = i+1;
+            //printf("st_name: %d\n", st_name);
+            //printf("r_info: %x\n", r_info);
+            //printf("plt_index: %d\n", plt_index);
             break;
         }
     }
-    /**
-        debug info
-    printf("st_name: %d\n", st_name);
-    printf("r_info: %p\n", r_info);
-    printf("plt_index: %d\n", plt_index);
-    printf("plt_addr: 0x%x\n", plthook->plt);
-    */
 
-    if((plt_index >0) && ((plt_index+1) * 0x10 < plthook->plt_size))
+    if((plt_index >0) && ((plt_index+1) * 0x10 <= plthook->plt_size))
         return (plthook->plt + plt_index*0x10);
 
     //failed to find this function's plt
     return 0;
 
+}
+
+void pre_libc_hook(pid_t tracee, plthook_t* plthook)
+{
+    Hunter_libc_reg(tracee, plthook, "puts", Hunter_puts);
+    Hunter_libc_reg(tracee, plthook, "__isoc99_scanf", Hunter_scanf);
+}
+
+void Hunter_libc_reg(pid_t tracee, plthook_t* plthook, const char* name, Hunter_libc_hook Hunter_function)
+{
+    bkpoint *bk = NULL;
+    bk = malloc(sizeof(size_t)*3+1);
+    if(!bk){
+        perror("error in malloc for breakpoint!");
+        return;
+    }
+
+    size_t plt_addr = find_plt(plthook, name);
+    if(!plt_addr){
+        perror("find plt");
+        return;
+    }
+
+    printf("%s's plt: 0x%x\n", name, plt_addr);
+    //set break info
+    bk->bkaddr = plt_addr;
+    bk->dealfunc = Hunter_function;
+
+    //set 0xcc
+    setbreak(tracee, bk);
+    break_list[breakIndex(bk->bkaddr)] = bk;
+    printf("Hook %s success!", name);
+    return ;
+}
+
+void Hunter_libc_unreg(pid_t tracee, plthook_t* plthook, const char* name){
+    size_t plt_addr = find_plt(plthook, name);
+    if(plt_addr == NULL){
+        perror("find plt");
+        return;
+    }
+    //clear break info
+    clearbreak(tracee, break_list[breakIndex(plt_addr)]);
+
+    free(break_list[breakIndex(plt_addr)]);
+    break_list[breakIndex(plt_addr)] = NULL;
+    printf("Unhook %s success!", name);
+    return ;
+}
+
+int Hunter_puts(pid_t tracee)
+{
+    puts("tracee is at puts");
+    struct user_regs_struct regs;
+    ptrace(PTRACE_GETREGS, tracee, 0, &regs);
+
+    //puts args
+    char* puts_str;
+    printf("data addr: 0x%x", regs.rdi);
+    ptrace_getdata(tracee, regs.rdi, &puts_str, 5);
+    printf("puts_str: %s\n", puts_str);
+    return 0;
+}
+
+int Hunter_scanf(pid_t tracee)
+{
+    puts("tracee is at scanf");
+    struct user_regs_struct regs;
+    ptrace(PTRACE_GETREGS, tracee, 0, &regs);
+
+    //printf's fmt
+    char* scanf_fmt;
+    printf("data addr: 0x%x", regs.rdi);
+    ptrace_getdata(tracee, regs.rdi, &scanf_fmt, 2);
+    printf("scanf_fmt: %s\n", scanf_fmt);
+    return 0;
 }
 
 //dynsym

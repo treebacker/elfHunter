@@ -16,10 +16,14 @@ int main(int argc, char* argv[], char* envp[])
 	else{
 		wait(NULL);				//must need
 		plthook_t *plthook;
-		//pre_sys_hook();
-		//tracerwork(childPid);
-		breakpoint(childPid, 0x400566);
 		plthook_open(&plthook, argv[1], childPid);
-		//plthook_put(plthook);
+
+		//set syscall hook & libc hook
+		//pre_sys_hook();
+		pre_libc_hook(childPid, plthook);
+
+
+		puts("hook libc over!");
+		tracerwork(childPid);
 	}
 }

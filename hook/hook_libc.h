@@ -13,14 +13,26 @@
 typedef struct plthook plthook_t;
 //get target process's dynsym information
 int plthook_open(plthook_t **plthook_out, const char* filename, pid_t tracee);
-int plthook_replace(plthook_t *plthook, const char *funcname, void *funcaddr, void **oldfunc);
 void plthook_close(plthook_t *plthook);
-
 size_t
 find_plt(plthook_t *plthook, const char* funcname);
 
+//demo hook for libc function
+typedef int (*Hunter_libc_hook)(pid_t tracee);
+int Hunter_puts(pid_t tracee);
+int Hunter_scanf(pid_t tracee);
+
+//regsiter
+void pre_libc_hook(pid_t tracee, plthook_t* plthook);
+void Hunter_libc_reg(pid_t tracee, plthook_t* plthook, const char* name, Hunter_libc_hook Hunter_function);
+void Hunter_libc_unreg(pid_t tracee, plthook_t* plthook, const char* name);
+
+
 void ptrace_getdata(pid_t tracee, char* addr_in, 
                         char** addr_out, size_t size);
+
+
+
 int
 check_elf_ident(FILE *stream);
 Elf_Ehdr *

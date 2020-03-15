@@ -20,6 +20,12 @@
      execve(2).  Alternatively, one process may commence tracing another
      process using PTRACE_ATTACH or PTRACE_SEIZE.
     ```
+    
+    syscall函数hook注册
+    
+    ```c 
+    void Hunter_sys_reg(long syscall, Hunter_sys_hook callback);
+    ```
 
 * HOOK glibc库函数
 
@@ -58,6 +64,31 @@
     ##### 解决思路
     
     针对这一点，没找到一个完美的解决方案。目前只能根据大多数的调试器的做法，**通过解析符号，获得main函数的地址，在main函数入口处下int3中断**，tracer接受到该信号后才可以完成解析plt的操作。（我们的hunter也没有必跟踪libc初始化的过程，所以也有必要在execve启动目标进程之后，让目标进程运行至main再trace！
+    
+    
+    
+    ##### 断点结构体
+    
+    ```c 
+    struct breakpoint{
+    	size_t bkaddr;	//addr % 0x1000
+    	Hunter_hook dealfunc;	//Hunter function
+    	union breakval bakval;	//breakpoint's value
+    
+    };
+    ```
+    
+    在addr处设置断点，将地址处的值写入0xcc
+    
+    ```c 
+    extern void setbreak(pid_t tracee, bkpoint* bkp)
+    ```
+    
+    libc函数hook注册
+    
+    ``` c
+    void Hunter_libc_reg(pid_t tracee, plthook_t* plthook, const char* name, Hunter_libc_hook Hunter_function);
+    ```
     
     
 

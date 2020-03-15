@@ -3,6 +3,9 @@
 
 int main()
 {
-	puts("aaaa");
-	printf("wwwww");
+	char buf[0x10];
+	scanf("%s", &buf);
+	printf("scanf: %s\n", &buf);
+	puts("over!");
+	return 0;
 }
